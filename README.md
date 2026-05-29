@@ -1,103 +1,55 @@
-# AWS Production Platform for Voice-Controlled & Autonomous AI Agents
+# Production Platform for Voice-Controlled and Autonomous Agents
 
-**A secure, observable, cost-aware, human-in-the-loop platform for running real AI agents (including voice agents with phone numbers) in production on AWS.**
+A runtime environment for running stateful, tool-using AI agents at production scale on AWS, with particular attention to voice interfaces, human oversight boundaries, and the operational realities of non-deterministic workloads.
 
-This is the cloud-native, production-grade evolution of local agentic systems (such as the Grok Build environment + voice control work). It is designed to be a **living, continuously improved project** while studying for the AWS Solutions Architect Professional exam.
+## Scope
 
-**GitHub:** https://github.com/deliverydriver/aws-agent-platform
+This is not another "build an agent with Bedrock" template. The focus is the surrounding platform required once you have agents that need to:
 
-## Why This Is Extremely Powerful for Applications
+- Maintain long-running state and memory across sessions and failures
+- Execute tools with real side effects while remaining within acceptable risk boundaries
+- Handle voice and telephony workloads with the latency and reliability expectations of production voice systems
+- Be observable when their behavior is inherently non-deterministic
+- Have their inference and tool costs attributed and controlled
 
-Most candidates can draw boxes for "Lambda + API Gateway + DynamoDB".
+The platform provides orchestration, secure execution environments, approval gates, state management, observability, and cost controls shaped by those requirements.
 
-Very few can credibly talk about:
+## Core Concerns
 
-- Running **long-lived autonomous agents** with tool use, memory, and human oversight at scale
-- Securely giving AI agents the ability to act (while keeping a human in the loop for dangerous operations)
-- Cost management for unpredictable LLM spend
-- Observability for non-deterministic agent behavior
-- Voice + telephony integration at production quality (LiveKit + SIP)
+**Secure tool use at scale**  
+Agents that can call real tools (code execution, API calls, file operations, external services) require different boundaries than typical application service accounts. The design treats dangerous capabilities as privileged operations that can be gated, audited, and in many cases routed through human approval workflows.
 
-This project gives you concrete stories in all of those areas.
+**Human-in-the-loop as architecture**  
+For any capability with material side effects, the system is designed so that human approval is a first-class, low-latency part of the execution path rather than an after-the-fact review.
 
-### Exam Alignment (Solutions Architect – Professional)
+**Cost and capacity for non-deterministic workloads**  
+Inference spend is volatile. Agent loops can generate large numbers of tool calls and model invocations. The platform includes attribution, budgeting, and throttling mechanisms that operate at the level of individual agents or customers rather than just accounts.
 
-| Domain                              | Strength Demonstrated |
-|-------------------------------------|-----------------------|
-| Design for new solutions            | Building a new class of workload (agentic systems) on AWS |
-| Design for security                 | Secure tool calling, least-privilege for agents, human approval gates, PrivateLink for AI services |
-| Design for reliability              | Handling long-running stateful agents, failure modes of non-deterministic systems, DR for agent memory |
-| Design for performance & scalability| Handling bursty voice traffic + background agent work |
-| Design for cost optimization        | Real strategies for controlling LLM spend at scale |
-| Design for operational excellence   | Observability of agent runs, debugging non-deterministic systems, deployment patterns for agents |
+**Observability for agent behavior**  
+Traditional request/response tracing is insufficient. The system captures agent trajectories, decision points, tool invocations, and state transitions in a way that supports debugging, evaluation, and audit.
 
-## Core Capabilities (Roadmap)
+**Voice and real-time interfaces**  
+Support for low-latency voice agents (including telephony) introduces additional constraints around session management, media handling, and graceful degradation.
 
-### Phase 1 – Foundation (Current Focus)
-- Secure "agent runtime" accounts isolated from the landing zone
-- Event-driven orchestration backbone (EventBridge + Step Functions + SQS)
-- Human-in-the-loop approval system (ties into voice control work)
-- Secure outbound tool execution (the agent can call tools, but dangerous actions require approval)
-- Basic cost allocation and budgets per agent / per customer
+## Current Direction
 
-### Phase 2 – Voice & Telephony
-- Production hosting patterns for LiveKit + xAI Grok Voice agents with phone numbers
-- Private connectivity where possible
-- Real-time observability of voice sessions
-- Failover and scaling strategies for voice workloads
+The repository captures the evolving architecture for the runtime. Early emphasis is on:
 
-### Phase 3 – Advanced Agent Patterns
-- Long-running agent state management (DynamoDB + S3 + possibly EFS or custom)
-- Multi-agent orchestration and delegation
-- Integration with Amazon Bedrock Agents + custom tool servers
-- Evaluation harnesses and regression testing for agent behavior
+- Orchestration backbone (EventBridge, Step Functions, SQS) suitable for long-running agent sessions
+- Execution environments for agents with different privilege levels
+- Integration patterns with the landing zone for cross-account tool execution
+- Initial cost attribution and guardrail mechanisms
 
-### Phase 4 – Production Hardening
-- Full CI/CD for agent code + infrastructure
-- Advanced security (VPC Lattice, Verified Access, fine-grained tool permissions)
-- Sophisticated cost controls and anomaly detection on LLM usage
-- Multi-region and DR strategies for stateful agents
+Later work will address production voice integration, advanced state and memory stores, evaluation harnesses, and tighter coupling with Bedrock Agents and custom tool servers.
 
-## Architecture Principles
+## Relationship to Other Work
 
-1. **Agents are untrusted workloads** — even more than typical serverless functions. They get narrow, auditable tool access.
-2. **Human oversight is a first-class architectural component** for anything with side effects.
-3. **Observability must handle non-determinism** (you can't just look at logs the same way).
-4. **Cost is a reliability and security concern** when dealing with LLMs.
-5. **The platform should make the right thing the easy thing** for both AI engineers and platform teams.
+This platform is intended to run inside the governance boundaries defined in aws-landing-zone-for-ai and incorporates patterns from aws-sovereign-infrastructure when higher restrictions are required. Detailed reviews of specific architectural slices live in aws-well-architected-ai.
 
-## Relationship to Other Projects
+## Context
 
-- Built on top of [aws-landing-zone-for-ai](../aws-landing-zone-for-ai)
-- Will be one of the primary workloads reviewed in [aws-well-architected-ai](../aws-well-architected-ai)
-- Can incorporate sovereign / highly restricted patterns from the fourth project when needed for clients
-
-## Current Status
-
-This repo is in early scaffold phase. The local version of parts of this system (the voice-to-grok-build bridge) is being built in a companion project. This AWS version is the production target.
-
-## Technology Direction (Subject to Change)
-
-- **Orchestration**: Step Functions (Express + Standard), EventBridge, SQS, SNS
-- **Compute for Agents**: ECS Fargate (primary), EKS where needed, Lambda for short tasks
-- **Voice / Realtime**: LiveKit (self-hosted or Cloud) + AWS services for signaling/media where it makes sense
-- **AI Services**: Heavy use of Amazon Bedrock (Agents, Knowledge Bases, Guardrails) + custom tool servers
-- **State & Memory**: DynamoDB, S3, possibly Aurora or custom vector stores
-- **Human-in-the-Loop**: API Gateway / AppSync + the web control plane (evolved from local voice control work)
-- **Observability**: X-Ray + CloudWatch + custom agent run tracing
-- **IaC**: Terraform (primary) with possible CDK for complex AI constructs
-
-## Getting Involved / Following Along
-
-This is a public living project. As I study and build real systems, this repository will be updated with:
-- Architecture Decision Records
-- Cost models and real spend data (anonymized)
-- Security reviews
-- Production incident learnings (when they happen)
-- Well-Architected reviews
+I already operate sophisticated local agentic systems with persistent identity, memory, and voice interfaces. This repository documents the production AWS realization of those systems — the runtime, security model, and operational practices required to run them reliably for real workloads.
 
 ---
 
-**Objective**: When I walk into an interview or client conversation and they ask about running AI agents in production on AWS, I can point to this repo and say "Here's the actual platform I'm building and operating."
-
-Built while preparing for the AWS Certified Solutions Architect – Professional exam.
+The designs are driven by actual usage rather than exam scenarios or generic best practices. Specifics around tool boundaries, approval latency, cost attribution, and failure modes for long-running agents are the interesting parts.
