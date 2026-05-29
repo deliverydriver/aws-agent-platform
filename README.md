@@ -53,3 +53,54 @@ I already operate sophisticated local agentic systems with persistent identity, 
 ---
 
 The designs are driven by actual usage rather than exam scenarios or generic best practices. Specifics around tool boundaries, approval latency, cost attribution, and failure modes for long-running agents are the interesting parts.
+
+## Services and Patterns for Demonstrating Depth
+
+To show extensive, real-world experience with complex modern workloads, this project will incorporate sophisticated usage of the following AWS capabilities, integrated around the specific challenges of stateful agents, voice, secure tool use, and cost volatility:
+
+**Orchestration & Compute (Advanced)**
+- AWS Step Functions (both Standard for long-running sessions with human approval via Task Tokens, and Express for high-throughput short tasks).
+- Amazon EventBridge (custom buses, rules, pipes, and schema registry) as the core event fabric for agent lifecycle, tool results, and human decisions.
+- ECS Fargate and/or EKS with advanced service connectivity (VPC Lattice or App Mesh), task IAM roles, and secrets integration.
+- Lambda with Powertools for TypeScript/Python, Destinations, and SnapStart where it improves agent tool handler performance.
+- AWS Batch for heavy background agent computation when needed.
+
+**AI Services at Production Depth**
+- Amazon Bedrock: Agents, Knowledge Bases, Guardrails (with custom policies), provisioned throughput, model invocation logging, and custom model import patterns.
+- SageMaker: Real-time and Serverless endpoints, Inference Recommender, Model Monitor, Clarify for agent decision explainability, and fine-grained IAM for model access.
+- Secure, auditable tool server architectures using API Gateway + Lambda/ECS fronted by approval proxies, exposed via PrivateLink, with request validation and capability-based authorization.
+
+**Voice, Telephony & Real-Time**
+- Deep integration patterns with LiveKit (self-hosted on ECS/EKS) including signaling, media handling, and session lifecycle tied to agent state.
+- Use of Amazon Transcribe, Polly, and Chime SDK components where they add value alongside or instead of external voice infrastructure.
+- WebSocket and real-time patterns (API Gateway WebSocket, AppSync, or direct with ALB) for low-latency agent interaction.
+
+**Human Oversight & Workflow**
+- Step Functions + SNS/SQS + API Gateway/AppSync approval workflows that are first-class in the architecture.
+- Audit trails of approval decisions linked to agent sessions and tool invocations.
+- Risk-based routing of tool capabilities to different approval paths or automated policies.
+
+**Cost Management & FinOps (Agent Reality)**
+- Fine-grained spend attribution using CUR + custom attribution logic down to agent sessions or customers.
+- Budgets + Cost Anomaly Detection with automated responses (throttling, alerts, or session termination) tuned for LLM spend.
+- Strategic use of provisioned capacity (Bedrock provisioned throughput, SageMaker provisioned concurrency) vs on-demand, plus Graviton and Spot strategies for execution environments.
+
+**Observability & Evaluation**
+- Advanced distributed tracing with X-Ray (custom subsegments for model calls and tool executions) combined with OpenTelemetry.
+- Custom CloudWatch metrics, logs, and Evidently-style evaluation for agent trajectories, success rates, and cost-per-outcome.
+- Integration with Bedrock evaluation capabilities and custom harnesses for regression testing agent behavior.
+
+**Security & Identity**
+- Workload identity patterns (IAM Roles Anywhere, OIDC federation, or custom short-lived credential vending for agents).
+- Secrets management with rotation for tool credentials.
+- Defense-in-depth network controls (all model and tool traffic over PrivateLink where feasible).
+- Data protection using KMS envelope encryption for agent memory combined with Macie scanning of outputs.
+
+**IaC & Platform Engineering**
+- Reusable, well-tested Terraform modules or CDK constructs for "agent runtime environment", "approved tool server", "voice session handler", etc.
+- Strong CI/CD with policy-as-code, security scanning, and safe deployment practices for agent and platform updates.
+- Cross-account execution patterns that keep the blast radius of agent actions tightly controlled.
+
+These will be backed by detailed ADRs, architecture diagrams showing data flows and trust boundaries, cost models with real (anonymized) data, operational runbooks, and security baselines — the kind of artifacts that only come from building and running these systems.
+
+Further reading in the sibling repositories covers the landing zone governance, reference architectures under review, and patterns for more restricted environments.
