@@ -4,6 +4,8 @@
 
 This is the cloud-native, production-grade evolution of local agentic systems (such as the Grok Build environment + voice control work). It is designed to be a **living, continuously improved project** while studying for the AWS Solutions Architect Professional exam.
 
+**GitHub:** https://github.com/deliverydriver/aws-agent-platform
+
 ## Why This Is Extremely Powerful for Applications
 
 Most candidates can draw boxes for "Lambda + API Gateway + DynamoDB".
